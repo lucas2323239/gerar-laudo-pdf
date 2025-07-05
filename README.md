@@ -1,1 +1,0 @@
-# gerar-laudo-pdf
