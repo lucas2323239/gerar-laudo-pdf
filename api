@@ -10,9 +10,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   });
 
   const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0' });
 
-  const pdfBuffer = await page.pdf({ format: 'A4', margin: { top: '40px', bottom: '40px' } });
+  // 🔥 CSS para reduzir o espaçamento no PDF
+  const css = `
+    p {
+      margin: 0 !important;
+      line-height: 1.0 !important;
+    }
+    table {
+      border-collapse: collapse !important;
+    }
+    td, th {
+      padding: 4px !important;
+      vertical-align: top;
+    }
+  `;
+
+  // 🔥 Injeta o CSS antes do HTML
+  const finalHTML = `
+    <style>${css}</style>
+    ${html}
+  `;
+
+  await page.setContent(finalHTML, { waitUntil: 'networkidle0' });
+
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
+    margin: { top: '40px', bottom: '40px' }
+  });
 
   await browser.close();
 
@@ -20,3 +45,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Content-Disposition', 'inline; filename=laudo.pdf');
   res.send(pdfBuffer);
 }
+
